@@ -24,7 +24,8 @@ jobs:
     - name: Configure & build
       shell: msys2 {0}
       run: |
-        ./configure
+        export PKG_CONFIG_PATH=/mingw64/lib/pkgconfig
+        ./configure --with-libpcap --without-zenmap
         make -j$(nproc)
 
     - name: Upload build artifacts
