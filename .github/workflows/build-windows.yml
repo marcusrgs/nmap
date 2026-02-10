@@ -1,4 +1,4 @@
-name: Build Nmap (Windows, no libpcap)
+name: Build Nmap (Windows, forced no libpcap)
 
 on:
   workflow_dispatch:
@@ -22,17 +22,25 @@ jobs:
           mingw-w64-x86_64-openssl
           mingw-w64-x86_64-lua
 
-    - name: Configure Nmap (no libpcap)
+    - name: Force-disable libpcap and configure
       shell: msys2 {0}
       run: |
-        ./configure --without-libpcap --without-zenmap
+        export ac_cv_header_pcap_h=no
+        export ac_cv_lib_pcap_pcap_open_live=no
+        export ac_cv_lib_pcap_pcap_open_dead=no
+        export NMAP_NO_LIBPCAP=1
+
+        ./configure \
+          --without-libpcap \
+          --without-zenmap \
+          --disable-npcap
 
     - name: Build Nmap
       shell: msys2 {0}
       run: |
         make -j$(nproc)
 
-    - name: Strip binary (reduce AV flags)
+    - name: Strip binary
       shell: msys2 {0}
       run: |
         strip nmap.exe || true
