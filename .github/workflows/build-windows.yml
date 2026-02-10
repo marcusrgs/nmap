@@ -21,21 +21,10 @@ jobs:
           mingw-w64-x86_64-libpcap
           mingw-w64-x86_64-lua
 
-    - name: Configure & build (MinGW64)
+      - name: Configure & build (no libpcap)
       shell: msys2 {0}
       run: |
-        export MSYSTEM=MINGW64
-        export CHOST=x86_64-w64-mingw32
-        export PKG_CONFIG_PATH=/mingw64/lib/pkgconfig
-        export CFLAGS="-I/mingw64/include"
-        export LDFLAGS="-L/mingw64/lib"
-
-        ./configure \
-          --host=x86_64-w64-mingw32 \
-          --with-libpcap \
-          --without-libpcap-bundled \
-          --without-zenmap
-
+        ./configure --without-libpcap --without-zenmap
         make -j$(nproc)
 
     - name: Upload build artifacts
