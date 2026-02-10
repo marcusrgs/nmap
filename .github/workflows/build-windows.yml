@@ -1,4 +1,4 @@
-name: Build Nmap (Windows)
+name: Build Nmap (Windows, no libpcap)
 
 on:
   workflow_dispatch:
@@ -14,21 +14,31 @@ jobs:
     - name: Setup MSYS2
       uses: msys2/setup-msys2@v2
       with:
+        msystem: MINGW64
+        update: true
         install: >
           base-devel
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-openssl
-          mingw-w64-x86_64-libpcap
           mingw-w64-x86_64-lua
 
-      - name: Configure & build (no libpcap)
+    - name: Configure Nmap (no libpcap)
       shell: msys2 {0}
       run: |
         ./configure --without-libpcap --without-zenmap
+
+    - name: Build Nmap
+      shell: msys2 {0}
+      run: |
         make -j$(nproc)
 
-    - name: Upload build artifacts
+    - name: Strip binary (reduce AV flags)
+      shell: msys2 {0}
+      run: |
+        strip nmap.exe || true
+
+    - name: Upload Nmap binary
       uses: actions/upload-artifact@v4
       with:
-        name: nmap-windows-build
-        path: .
+        name: nmap-windows
+        path: nmap.exe
